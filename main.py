@@ -1,30 +1,28 @@
 import pygame as pg
 import random
 
-pg.init()  # У тебя ниже блок кода, перенеси эту строку в поз, например 14
-
 SCREEN_WIDTH, SCREEN_HEIGHT = 480, 640
 BIRD_WIDTH, BIRD_HEIGHT = 50, 50
-PIPE_WIDTH, PIPE_GAP = 80, 250
+PIPE_WIDTH, PIPE_GAP = 80, 100
 SPEED = 5
 UP = "up"
 DOWN = "down"
 ticks = 1
 
-
+pg.init()
 screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pg.display.set_caption("~~Flappy Bird~~")
 icon = pg.image.load("images/icon.png")
 pg.display.set_icon(icon)
 
-class Bird(pg.sprite.Sprite):  # Перед определением класса делай две пустые строки
+
+class Bird(pg.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.image = pg.image.load("images/bird.png")
-        self.rect = self.image.get_rect() # Эту строку можно удалить, ниже ты определяешь rect с параметрами
         self.rect = self.image.get_rect(center=(SCREEN_WIDTH // 4, SCREEN_HEIGHT // 2))
         self.gravity = 1
-        self.lift = -15 # Добавляй комментарии к переменным, а то не всегда понятно что они делают и за что отвечают
+        self.lift = -15  # jump height
         self.velocity = 0
         self.can_jump = True
         self.sound_num = 1
@@ -46,9 +44,7 @@ class Bird(pg.sprite.Sprite):  # Перед определением класс�
             self.velocity = self.lift
             pg.mixer_music.load(f"sounds/jump{self.sound_num}.wav")
             pg.mixer_music.play()
-            self.sound_num += 1  # попробуй здесь использовать тернарный оператор, код будет короче и более читабельным
-            if self.sound_num == 6:
-                self.sound_num = 1
+            self.sound_num = random.randint(1, 5)
 
     def die(self):
         if self.can_jump:
@@ -57,40 +53,43 @@ class Bird(pg.sprite.Sprite):  # Перед определением класс�
             pg.mixer_music.load(f"sounds/explosion{self.sound_num}.wav")
             pg.mixer_music.play()
 
-class Pipe(pg.sprite.Sprite):  # не забывай про две пустые строки перед классом
+
+class Pipe(pg.sprite.Sprite):
     def __init__(self, direction, upper_pipe):
         super().__init__()
-        self.image = pg.image.load("images/pipeDown.png")  # Эта строка лишняя, т.к. image определяешь в стр 68 или 71
-        self.rect = self.image.get_rect()  # Это тоже можно вынести в блок if/else стр 67
         self.speed = 10
-        self.rect.x = SCREEN_WIDTH + 20
         if direction == UP:
-            self.image = pg.image.load("images/pipeUp.png")
+            self.image = pg.image.load("images/pipeDown.png")
+            self.rect = self.image.get_rect()
+            self.rect.x = SCREEN_WIDTH + 20
             self.rect.y = random.randint(-250, 0)
         else:
-            self.image = pg.image.load("images/pipeDown.png")
-            self.rect.y = upper_pipe + SCREEN_HEIGHT -100  # 100 это как я понял высота ворот из труб, давай вынесем это в константу
+            self.image = pg.image.load("images/pipeUp.png")
+            self.rect = self.image.get_rect()
+            self.rect.x = SCREEN_WIDTH + 20
+            self.rect.y = upper_pipe.rect.y + SCREEN_HEIGHT - PIPE_GAP
 
-
-    def update(self):  # перед функцией внутри класса одна пустая строка, а не 2
+    def update(self):
         self.rect.x -= self.speed
 
-bird = Bird()  # нет ли смысла весь блок 78 - 81 строку перенести в функцию main или сделать класс Game и в него добавить этот код и код из main
-all_sprites = pg.sprite.Group()
-pipes = pg.sprite.Group()
-all_sprites.add(bird)
+
+
 
 
 def main(ticks):
+    bird = Bird()
+    all_sprites = pg.sprite.Group()
+    pipes = pg.sprite.Group()
+    all_sprites.add(bird)
     can_press = False
     while True:
         if ticks % 30 == 0:
             pipeup = Pipe(UP, 0)
             pipes.add(pipeup)
-            pipedown = Pipe(DOWN, pipeup.rect.y)  # предлагаю сделать более читаемый код, вторым аргументом передавать всю вернюю трубу, а в функции забирать y
+            pipedown = Pipe(DOWN,
+                            pipeup)
             pipes.add(pipedown)
         events = pg.event.get()
-        pg.transform.scale(bird.image, (BIRD_WIDTH, BIRD_HEIGHT))  # а нельзя это перенести в класс птицы, в init?
         for e in events:
             if e.type == pg.QUIT:
                 quit("Вышел из игры")
@@ -107,7 +106,8 @@ def main(ticks):
         screen.blit(bird.image, bird.rect)
         pg.display.update()
         pg.time.delay(30)
-        if pg.key.get_pressed()[pg.K_SPACE] and can_press:  # Объясни что делает can_press? вроде как без нее должно работать?
+        if pg.key.get_pressed()[
+            pg.K_SPACE] and can_press:
             bird.jump()
             can_press = False
         if not pg.key.get_pressed()[pg.K_SPACE]:
@@ -116,6 +116,4 @@ def main(ticks):
 
 
 if __name__ == '__main__':
-    main(ticks)  # не забывай добавлять одну пустую строку в конец кода, правило хорошего тона
-
-# Перед тем как закинуть на githab, положи файл gitignore. Файл добавил, он ограничивает, чтобы мусор не летел в рипозиторий
+    main(ticks)
