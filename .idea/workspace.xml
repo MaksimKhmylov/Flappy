@@ -5,9 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="15c8522d-3718-4292-ab56-fddeb3cb6440" name="Changes" comment="update">
+      <change afterPath="$PROJECT_DIR$/sounds/points.mp3" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/pipeDown.png" beforeDir="false" afterPath="$PROJECT_DIR$/images/pipeDown.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/pipeUp.png" beforeDir="false" afterPath="$PROJECT_DIR$/images/pipeUp.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -32,14 +31,14 @@
     "Python.main.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "master",
-    "last_opened_file_path": "C:/Users/Max/PycharmProjects/Flappy/images"
+    "last_opened_file_path": "C:/Users/Max/PycharmProjects/Flappy/sounds"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Max\PycharmProjects\Flappy\sounds" />
       <recent name="C:\Users\Max\PycharmProjects\Flappy\images" />
       <recent name="C:\Users\Max\PycharmProjects\Flappy" />
-      <recent name="C:\Users\Max\PycharmProjects\Flappy\sounds" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\Max\PycharmProjects\Flappy\images" />
@@ -102,7 +101,15 @@
       <option name="project" value="LOCAL" />
       <updated>1725273708365</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="update">
+      <option name="closed" value="true" />
+      <created>1725468901912</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1725468901912</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">

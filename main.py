@@ -10,7 +10,10 @@ DOWN = "down"
 ticks = 1
 
 pg.init()
+pg.font.init()
 screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+point_text = pg.font.SysFont(
+    'Comic Sans MS', 30)
 pg.display.set_caption("~~Flappy Bird~~")
 icon = pg.image.load("images/icon.png")
 pg.display.set_icon(icon)
@@ -77,12 +80,19 @@ class Pipe(pg.sprite.Sprite):
 
 
 def main(ticks):
+    points = 0
     bird = Bird()
     all_sprites = pg.sprite.Group()
     pipes = pg.sprite.Group()
     all_sprites.add(bird)
     can_press = False
+    died = False
     while True:
+        points = int(points)
+        points_on_screen = point_text.render(
+            f"{points}",
+            False,
+            (0, 0, 0))
         if ticks % 30 == 0:
             pipeup = Pipe(UP, 0)
             pipes.add(pipeup)
@@ -101,8 +111,13 @@ def main(ticks):
             screen.blit(pipe.image, pipe.rect)
             if pipe.rect.colliderect(bird.rect):
                 bird.die()
+                died = True
             if pipe.rect.x <= -100:
                 pipe.kill()
+                if not died:
+                    points += 0.5
+
+        screen.blit(points_on_screen, dest=(SCREEN_WIDTH//2 - 30, 0))
         screen.blit(bird.image, bird.rect)
         pg.display.update()
         pg.time.delay(30)
