@@ -10,7 +10,6 @@ PIPE_WIDTH, PIPE_GAP = 80, 100
 SPEED = 5
 UP = "up"
 DOWN = "down"
-ticks = 1
 
 pg.init()
 pg.font.init()
@@ -144,5 +143,4 @@ def main(ticks): # Функция получилась очень сложная
 
 
 if __name__ == '__main__':
-    while True:
-        main(ticks)
+    main(1)
