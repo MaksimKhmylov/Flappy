@@ -1,3 +1,4 @@
+# Ты импортировал time, но не использовал! Нужно удалить ======================
 import time
 
 import pygame as pg
@@ -44,7 +45,9 @@ class Bird(pg.sprite.Sprite):
             self.rect.bottom = SCREEN_HEIGHT
             self.velocity = 0
         if self.rect.bottom > SCREEN_HEIGHT + self.rect.height and not self.can_jump:
-            main(1)
+            main(1)  # Вот тут не очень очевидно, почему нужно вызвать main и почему передашь 1. Вообще очень некрасиво получилось, что метод класса
+            # вызывает медот из кода. Класс должен быть самодостаточным. Он не должен зависить от внешнего кода!!!
+            # Попробуй что нибудь придумать, сделать, чтобы метод класса не зависил от внешнено кода 
 
     def jump(self):
         if self.can_jump:
@@ -80,10 +83,11 @@ class Pipe(pg.sprite.Sprite):
         self.rect.x -= self.speed
 
 
+# Зачем так много пустых строк? Должно быть две по PEP
 
 
-
-def main(ticks):
+def main(ticks): # Функция получилась очень сложная и длинная. Одна функция - одно действие. 
+    # Здесь явно больше. Попробуй упростить. Разделить на несколько функций. Может какие-то вещи в классы засунуть
     points = 0
     bird = Bird()
     all_sprites = pg.sprite.Group()
@@ -93,7 +97,7 @@ def main(ticks):
     died = False
     while True:
         bird.rect.x = 80
-        points = int(points)
+        points = int(points) # У тебя же поинт int? зачем делать из int int?
         points_on_screen = point_text.render(
             f"{points}",
             False,
