@@ -1,3 +1,5 @@
+import time
+
 import pygame as pg
 import random
 
@@ -23,6 +25,7 @@ class Bird(pg.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.image = pg.image.load("images/bird.png")
+        self.sprite_copy = self.image
         self.rect = self.image.get_rect(center=(SCREEN_WIDTH // 4, SCREEN_HEIGHT // 2))
         self.gravity = 1
         self.lift = -15  # jump height
@@ -31,6 +34,7 @@ class Bird(pg.sprite.Sprite):
         self.sound_num = 1
 
     def update(self):
+        self.image = pg.transform.rotate(self.sprite_copy, -self.velocity)
         self.velocity += self.gravity
         self.rect.y += self.velocity
         if self.rect.top < 0 and self.can_jump:
@@ -40,7 +44,7 @@ class Bird(pg.sprite.Sprite):
             self.rect.bottom = SCREEN_HEIGHT
             self.velocity = 0
         if self.rect.bottom > SCREEN_HEIGHT + self.rect.height and not self.can_jump:
-            quit("Умер")
+            main(1)
 
     def jump(self):
         if self.can_jump:
@@ -88,6 +92,7 @@ def main(ticks):
     can_press = False
     died = False
     while True:
+        bird.rect.x = 80
         points = int(points)
         points_on_screen = point_text.render(
             f"{points}",
@@ -112,15 +117,18 @@ def main(ticks):
             if pipe.rect.colliderect(bird.rect):
                 bird.die()
                 died = True
+                bird.sprite_copy = bird.image
             if pipe.rect.x <= -100:
                 pipe.kill()
+            if pipe.rect.x == bird.rect.x - 60:
                 if not died:
                     points += 0.5
+            if died:
+                pipe.rect.x += 10
 
         screen.blit(points_on_screen, dest=(SCREEN_WIDTH//2 - 30, 0))
         screen.blit(bird.image, bird.rect)
         pg.display.update()
-        pg.time.delay(30)
         if pg.key.get_pressed()[
             pg.K_SPACE] and can_press:
             bird.jump()
@@ -128,7 +136,9 @@ def main(ticks):
         if not pg.key.get_pressed()[pg.K_SPACE]:
             can_press = True
         ticks += 1
+        pg.time.delay(30)
 
 
 if __name__ == '__main__':
-    main(ticks)
+    while True:
+        main(ticks)
