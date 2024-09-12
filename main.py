@@ -1,7 +1,5 @@
-# Ты импортировал time, но не использовал! Нужно удалить ======================
-import time
-
 import pygame as pg
+
 import random
 
 SCREEN_WIDTH, SCREEN_HEIGHT = 480, 640
@@ -10,6 +8,9 @@ PIPE_WIDTH, PIPE_GAP = 80, 100
 SPEED = 5
 UP = "up"
 DOWN = "down"
+can_press = False
+died = False
+points = 0
 
 pg.init()
 pg.font.init()
@@ -78,66 +79,69 @@ class Pipe(pg.sprite.Sprite):
             self.rect.x = SCREEN_WIDTH + 20
             self.rect.y = upper_pipe.rect.y + SCREEN_HEIGHT - PIPE_GAP
 
-    def update(self):
+    def update(self, bird):
         self.rect.x -= self.speed
+        self.logic(bird)
+
+    def logic(self, bird):
+        global died, points
+        if self.rect.colliderect(bird.rect):
+            bird.die()
+            died = True
+            bird.sprite_copy = bird.image
+        if self.rect.x <= -100:
+            self.kill()
+        if self.rect.x == bird.rect.x - 60:
+            if not died:
+                points += 0.5
+def _render(pipes: pg.sprite.Group, bird: Bird, points_on_screen):
+    screen.fill('white')
+    for pipe in pipes:
+        screen.blit(pipe.image, pipe.rect)
+    screen.blit(points_on_screen, dest=(SCREEN_WIDTH // 2 - 30, 0))
+    screen.blit(bird.image, bird.rect)
+    pg.display.update()
 
 
-# Зачем так много пустых строк? Должно быть две по PEP
+def get_user_input(bird: Bird):
+    global can_press
+    if pg.key.get_pressed()[
+        pg.K_SPACE] and can_press:
+        bird.jump()
+        can_press = False
+    if not pg.key.get_pressed()[pg.K_SPACE]:
+        can_press = True
+    events = pg.event.get()
+    for e in events:
+        if e.type == pg.QUIT:
+            quit("Вышел из игры")
 
 
-def main(ticks): # Функция получилась очень сложная и длинная. Одна функция - одно действие. 
-    # Здесь явно больше. Попробуй упростить. Разделить на несколько функций. Может какие-то вещи в классы засунуть
-    points = 0
+
+
+def main(ticks):
     bird = Bird()
     all_sprites = pg.sprite.Group()
     pipes = pg.sprite.Group()
     all_sprites.add(bird)
-    can_press = False
-    died = False
+    bird.rect.x = 80
     while True:
-        bird.rect.x = 80
-        points = int(points) # У тебя же поинт int? зачем делать из int int?
+        print(bird.rect.center)
         points_on_screen = point_text.render(
-            f"{points}",
+            f"{round(points)}",
             False,
             (0, 0, 0))
+        _render(pipes, bird, points_on_screen)
         if ticks % 30 == 0:
             pipeup = Pipe(UP, 0)
             pipes.add(pipeup)
             pipedown = Pipe(DOWN,
                             pipeup)
             pipes.add(pipedown)
-        events = pg.event.get()
-        for e in events:
-            if e.type == pg.QUIT:
-                quit("Вышел из игры")
 
-        screen.fill('white')
         all_sprites.update()
-        pipes.update()
-        for pipe in pipes:
-            screen.blit(pipe.image, pipe.rect)
-            if pipe.rect.colliderect(bird.rect):
-                bird.die()
-                died = True
-                bird.sprite_copy = bird.image
-            if pipe.rect.x <= -100:
-                pipe.kill()
-            if pipe.rect.x == bird.rect.x - 60:
-                if not died:
-                    points += 0.5
-            if died:
-                pipe.rect.x += 10
-
-        screen.blit(points_on_screen, dest=(SCREEN_WIDTH//2 - 30, 0))
-        screen.blit(bird.image, bird.rect)
-        pg.display.update()
-        if pg.key.get_pressed()[
-            pg.K_SPACE] and can_press:
-            bird.jump()
-            can_press = False
-        if not pg.key.get_pressed()[pg.K_SPACE]:
-            can_press = True
+        pipes.update(bird)
+        get_user_input(bird)
         ticks += 1
         pg.time.delay(30)
 
