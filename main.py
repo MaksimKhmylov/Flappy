@@ -2,6 +2,8 @@ import pygame as pg
 
 import random
 
+# После смерти перестают считаться очки. Цифра остается как была до смерти, проверь
+
 SCREEN_WIDTH, SCREEN_HEIGHT = 480, 640
 BIRD_WIDTH, BIRD_HEIGHT = 50, 50
 PIPE_WIDTH, PIPE_GAP = 80, 100
@@ -84,7 +86,7 @@ class Pipe(pg.sprite.Sprite):
         self.logic(bird)
 
     def logic(self, bird):
-        global died, points
+        global died, points # убери global! зачем, если нужно передай как аргумент функции! Вообще не используй global - плохая практика
         if self.rect.colliderect(bird.rect):
             bird.die()
             died = True
@@ -94,7 +96,7 @@ class Pipe(pg.sprite.Sprite):
         if self.rect.x == bird.rect.x - 60:
             if not died:
                 points += 0.5
-def _render(pipes: pg.sprite.Group, bird: Bird, points_on_screen):
+def _render(pipes: pg.sprite.Group, bird: Bird, points_on_screen): # Забыл пустую строку перед функцией
     screen.fill('white')
     for pipe in pipes:
         screen.blit(pipe.image, pipe.rect)
@@ -118,7 +120,7 @@ def get_user_input(bird: Bird):
 
 
 
-
+# Зачем так много пустых строк?
 def main(ticks):
     bird = Bird()
     all_sprites = pg.sprite.Group()
@@ -126,7 +128,7 @@ def main(ticks):
     all_sprites.add(bird)
     bird.rect.x = 80
     while True:
-        print(bird.rect.center)
+        print(bird.rect.center) # принты навеное нужно удалить 
         points_on_screen = point_text.render(
             f"{round(points)}",
             False,
@@ -147,4 +149,4 @@ def main(ticks):
 
 
 if __name__ == '__main__':
-    main(1)
+    main(1)  # в неочевидных местах можно делать вызов с именованными параметрами, чтобы улучшить читаемость main(ticks=1)
