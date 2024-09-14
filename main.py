@@ -2,7 +2,6 @@ import pygame as pg
 
 import random
 
-# После смерти перестают считаться очки. Цифра остается как была до смерти, проверь
 
 SCREEN_WIDTH, SCREEN_HEIGHT = 480, 640
 BIRD_WIDTH, BIRD_HEIGHT = 50, 50
@@ -19,9 +18,15 @@ pg.font.init()
 screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 point_text = pg.font.SysFont(
     'Comic Sans MS', 30)
-pg.display.set_caption("~~Flappy Bird~~")
+pg.display.set_caption("~-~Flappy Birdy~-~")
 icon = pg.image.load("images/icon.png")
 pg.display.set_icon(icon)
+
+
+def restart():
+    # points = 0
+    # main(ticks=1)
+    quit()
 
 
 class Bird(pg.sprite.Sprite):
@@ -47,9 +52,7 @@ class Bird(pg.sprite.Sprite):
             self.rect.bottom = SCREEN_HEIGHT
             self.velocity = 0
         if self.rect.bottom > SCREEN_HEIGHT + self.rect.height and not self.can_jump:
-            main(1)  # Вот тут не очень очевидно, почему нужно вызвать main и почему передашь 1. Вообще очень некрасиво получилось, что метод класса
-            # вызывает медот из кода. Класс должен быть самодостаточным. Он не должен зависить от внешнего кода!!!
-            # Попробуй что нибудь придумать, сделать, чтобы метод класса не зависил от внешнено кода 
+            restart()
 
     def jump(self):
         if self.can_jump:
@@ -86,7 +89,7 @@ class Pipe(pg.sprite.Sprite):
         self.logic(bird)
 
     def logic(self, bird):
-        global died, points # убери global! зачем, если нужно передай как аргумент функции! Вообще не используй global - плохая практика
+        global points, died
         if self.rect.colliderect(bird.rect):
             bird.die()
             died = True
@@ -96,7 +99,9 @@ class Pipe(pg.sprite.Sprite):
         if self.rect.x == bird.rect.x - 60:
             if not died:
                 points += 0.5
-def _render(pipes: pg.sprite.Group, bird: Bird, points_on_screen): # Забыл пустую строку перед функцией
+
+
+def _render(pipes: pg.sprite.Group, bird: Bird, points_on_screen):
     screen.fill('white')
     for pipe in pipes:
         screen.blit(pipe.image, pipe.rect)
@@ -119,8 +124,6 @@ def get_user_input(bird: Bird):
             quit("Вышел из игры")
 
 
-
-# Зачем так много пустых строк?
 def main(ticks):
     bird = Bird()
     all_sprites = pg.sprite.Group()
@@ -128,7 +131,6 @@ def main(ticks):
     all_sprites.add(bird)
     bird.rect.x = 80
     while True:
-        print(bird.rect.center) # принты навеное нужно удалить 
         points_on_screen = point_text.render(
             f"{round(points)}",
             False,
@@ -149,4 +151,4 @@ def main(ticks):
 
 
 if __name__ == '__main__':
-    main(1)  # в неочевидных местах можно делать вызов с именованными параметрами, чтобы улучшить читаемость main(ticks=1)
+    main(ticks=1)
