@@ -172,9 +172,9 @@ class Game:
 
     def leader_board(self):
         leader_screen = menu.Menu("Лидеры:", 300, 400, theme=menu.themes.THEME_BLUE)
-        leader_screen.add.label(f'1 место - {utils.get_top_players()[0]}')
-        leader_screen.add.label(f'2 место - {utils.get_top_players()[1]}')
-        leader_screen.add.label(f'3 место - {utils.get_top_players()[2]}')
+        leader_screen.add.label(f'1 место - {utils.get_top_players()[0].score}')
+        leader_screen.add.label(f'2 место - {utils.get_top_players()[1].score}')
+        leader_screen.add.label(f'3 место - {utils.get_top_players()[2].score}')
         leader_screen.add.button('Меню', self.show_start_screen)
         leader_screen.mainloop(screen)
 
