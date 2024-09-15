@@ -1,17 +1,17 @@
 import pygame as pg
+import pygame_menu as menu
 
 import random
+
+import utils
 
 
 SCREEN_WIDTH, SCREEN_HEIGHT = 480, 640
 BIRD_WIDTH, BIRD_HEIGHT = 50, 50
 PIPE_WIDTH, PIPE_GAP = 80, 100
-SPEED = 5
+SPEED = 10
 UP = "up"
 DOWN = "down"
-can_press = False
-died = False
-points = 0
 
 pg.init()
 pg.font.init()
@@ -23,25 +23,21 @@ icon = pg.image.load("images/icon.png")
 pg.display.set_icon(icon)
 
 
-def restart():
-    # points = 0
-    # main(ticks=1)
-    quit()
-
-
 class Bird(pg.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.image = pg.image.load("images/bird.png")
         self.sprite_copy = self.image
-        self.rect = self.image.get_rect(center=(SCREEN_WIDTH // 4, SCREEN_HEIGHT // 2))
+        self.rect = self.image.get_rect(center=(SCREEN_WIDTH // 4,
+                                                SCREEN_HEIGHT // 2)
+                                        )
         self.gravity = 1
         self.lift = -15  # jump height
         self.velocity = 0
         self.can_jump = True
         self.sound_num = 1
 
-    def update(self):
+    def update(self, game):
         self.image = pg.transform.rotate(self.sprite_copy, -self.velocity)
         self.velocity += self.gravity
         self.rect.y += self.velocity
@@ -51,8 +47,11 @@ class Bird(pg.sprite.Sprite):
         if self.rect.bottom > SCREEN_HEIGHT and self.can_jump:
             self.rect.bottom = SCREEN_HEIGHT
             self.velocity = 0
-        if self.rect.bottom > SCREEN_HEIGHT + self.rect.height and not self.can_jump:
-            restart()
+        if (self.rect.bottom > SCREEN_HEIGHT + self.rect.height
+                and not self.can_jump):
+            self.kill()
+            game.show_end_screen()
+
 
     def jump(self):
         if self.can_jump:
@@ -72,7 +71,7 @@ class Bird(pg.sprite.Sprite):
 class Pipe(pg.sprite.Sprite):
     def __init__(self, direction, upper_pipe):
         super().__init__()
-        self.speed = 10
+        self.speed = SPEED
         if direction == UP:
             self.image = pg.image.load("images/pipeDown.png")
             self.rect = self.image.get_rect()
@@ -84,12 +83,11 @@ class Pipe(pg.sprite.Sprite):
             self.rect.x = SCREEN_WIDTH + 20
             self.rect.y = upper_pipe.rect.y + SCREEN_HEIGHT - PIPE_GAP
 
-    def update(self, bird):
+    def update(self, bird, game):
         self.rect.x -= self.speed
-        self.logic(bird)
+        self.logic(bird, game)
 
-    def logic(self, bird):
-        global points, died
+    def logic(self, bird, game):
         if self.rect.colliderect(bird.rect):
             bird.die()
             died = True
@@ -97,58 +95,89 @@ class Pipe(pg.sprite.Sprite):
         if self.rect.x <= -100:
             self.kill()
         if self.rect.x == bird.rect.x - 60:
-            if not died:
-                points += 0.5
+            if not game.died:
+                game.points += 0.5
 
 
-def _render(pipes: pg.sprite.Group, bird: Bird, points_on_screen):
-    screen.fill('white')
-    for pipe in pipes:
-        screen.blit(pipe.image, pipe.rect)
-    screen.blit(points_on_screen, dest=(SCREEN_WIDTH // 2 - 30, 0))
-    screen.blit(bird.image, bird.rect)
-    pg.display.update()
+class Game:
+    def __init__(self):
+        self.points = 0
+        self.died = False
+        self.can_press = False
+    def _render(self,pipes: pg.sprite.Group, bird: Bird, points_on_screen):
+        screen.fill('white')
+        for pipe in pipes:
+            screen.blit(pipe.image, pipe.rect)
+        screen.blit(points_on_screen, dest=(SCREEN_WIDTH // 2 - 30, 0))
+        screen.blit(bird.image, bird.rect)
+        pg.display.update()
 
 
-def get_user_input(bird: Bird):
-    global can_press
-    if pg.key.get_pressed()[
-        pg.K_SPACE] and can_press:
-        bird.jump()
-        can_press = False
-    if not pg.key.get_pressed()[pg.K_SPACE]:
-        can_press = True
-    events = pg.event.get()
-    for e in events:
-        if e.type == pg.QUIT:
-            quit("Вышел из игры")
+    def get_user_input(self,bird: Bird):
+        if pg.key.get_pressed()[
+            pg.K_SPACE
+        ] and self.can_press:
+            bird.jump()
+            self.can_press = False
+        if not pg.key.get_pressed()[pg.K_SPACE]:
+            self.can_press = True
+        events = pg.event.get()
+        for e in events:
+            if e.type == pg.QUIT:
+                quit("Вышел из игры")
 
 
-def main(ticks):
-    bird = Bird()
-    all_sprites = pg.sprite.Group()
-    pipes = pg.sprite.Group()
-    all_sprites.add(bird)
-    bird.rect.x = 80
-    while True:
-        points_on_screen = point_text.render(
-            f"{round(points)}",
-            False,
-            (0, 0, 0))
-        _render(pipes, bird, points_on_screen)
-        if ticks % 30 == 0:
-            pipeup = Pipe(UP, 0)
-            pipes.add(pipeup)
-            pipedown = Pipe(DOWN,
-                            pipeup)
-            pipes.add(pipedown)
+    def main(self,ticks=1):
+        self.points = 0
+        bird = Bird()
+        all_sprites = pg.sprite.Group()
+        pipes = pg.sprite.Group()
+        all_sprites.add(bird)
+        bird.rect.x = 80
+        self.died = False
+        while True:
+            bird.rect.x = SPEED*3
+            points_on_screen = point_text.render(
+                f"{round(self.points)}",
+                False,
+                (0, 0, 0))
+            self._render(pipes, bird, points_on_screen)
+            if ticks % 30 == 0:
+                pipeup = Pipe(UP, 0)
+                pipes.add(pipeup)
+                pipedown = Pipe(DOWN,
+                                pipeup)
+                pipes.add(pipedown)
 
-        all_sprites.update()
-        pipes.update(bird)
-        get_user_input(bird)
-        ticks += 1
-        pg.time.delay(30)
+            all_sprites.update(game=self)
+            pipes.update(bird, game)
+            self.get_user_input(bird)
+            ticks += 1
+            pg.time.delay(30)
 
+    def show_end_screen(self,):
+        end_menu = menu.Menu('Игра окончена', 300, 400,
+    theme=menu.themes.THEME_BLUE)
+        end_menu.add.label(f'Всего очков: {round(self.points)}', font_size=30)
+        end_menu.add.button('Заново', self.main)
+        end_menu.add.button('Выйти', menu.events.EXIT)
+        end_menu.mainloop(screen)
 
+    def show_start_screen(self):
+        start_screen = menu.Menu('Flappy Birdy', 300, 400, theme=menu.themes.THEME_BLUE)
+        start_screen.add.button('Начать', self.main)
+        start_screen.add.button('Выйти', menu.events.EXIT)
+        start_screen.add.button('Лидеры', self.leader_board)
+        start_screen.mainloop(screen)
+
+    def leader_board(self):
+        leader_screen = menu.Menu("Лидеры:", 300, 400, theme=menu.themes.THEME_BLUE)
+        leader_screen.add.label(f'1 место - {utils.get_top_players()[0]}')
+        leader_screen.add.label(f'2 место - {utils.get_top_players()[1]}')
+        leader_screen.add.label(f'3 место - {utils.get_top_players()[2]}')
+        leader_screen.add.button('Меню', self.show_start_screen)
+        leader_screen.mainloop(screen)
+
+game = Game()
 if __name__ == '__main__':
-    main(ticks=1)
+    game.show_start_screen()
