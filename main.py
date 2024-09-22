@@ -5,7 +5,6 @@ import random
 
 import utils
 
-
 SCREEN_WIDTH, SCREEN_HEIGHT = 480, 640
 BIRD_WIDTH, BIRD_HEIGHT = 50, 50
 PIPE_WIDTH, PIPE_GAP = 80, 100
@@ -52,7 +51,6 @@ class Bird(pg.sprite.Sprite):
             self.kill()
             game.show_end_screen()
 
-
     def jump(self):
         if self.can_jump:
             self.velocity = self.lift
@@ -90,7 +88,6 @@ class Pipe(pg.sprite.Sprite):
     def logic(self, bird, game):
         if self.rect.colliderect(bird.rect):
             bird.die()
-            died = True
             bird.sprite_copy = bird.image
         if self.rect.x <= -100:
             self.kill()
@@ -104,7 +101,8 @@ class Game:
         self.points = 0
         self.died = False
         self.can_press = False
-    def _render(self,pipes: pg.sprite.Group, bird: Bird, points_on_screen):
+
+    def _render(self, pipes: pg.sprite.Group, bird: Bird, points_on_screen):
         screen.fill('white')
         for pipe in pipes:
             screen.blit(pipe.image, pipe.rect)
@@ -112,8 +110,7 @@ class Game:
         screen.blit(bird.image, bird.rect)
         pg.display.update()
 
-
-    def get_user_input(self,bird: Bird):
+    def get_user_input(self, bird: Bird):
         if pg.key.get_pressed()[
             pg.K_SPACE
         ] and self.can_press:
@@ -126,8 +123,7 @@ class Game:
             if e.type == pg.QUIT:
                 quit("Вышел из игры")
 
-
-    def main(self,ticks=1):
+    def main(self, ticks=1):
         self.points = 0
         bird = Bird()
         all_sprites = pg.sprite.Group()
@@ -136,7 +132,7 @@ class Game:
         bird.rect.x = 80
         self.died = False
         while True:
-            bird.rect.x = SPEED*3
+            bird.rect.x = SPEED * 3
             points_on_screen = point_text.render(
                 f"{round(self.points)}",
                 False,
@@ -155,11 +151,17 @@ class Game:
             ticks += 1
             pg.time.delay(30)
 
-    def show_end_screen(self,):
+    def show_end_screen(self, ):
         end_menu = menu.Menu('Игра окончена', 300, 400,
-    theme=menu.themes.THEME_BLUE)
-        end_menu.add.label(f'Всего очков: {round(self.points)}', font_size=30)
+                             theme=menu.themes.THEME_BLUE)
+        if self.points > utils.get_top_player().score:
+            end_menu.add.label("НОВЫЙ РЕКОРД!")
+        utils.save_to_db("No name", self.points)
+        end_menu.add.label(
+            f'Всего очков: {round(self.points)}', font_size=30
+        )
         end_menu.add.button('Заново', self.main)
+        end_menu.add.button('Меню', self.show_start_screen)
         end_menu.add.button('Выйти', menu.events.EXIT)
         end_menu.mainloop(screen)
 
@@ -172,12 +174,14 @@ class Game:
 
     def leader_board(self):
         leader_screen = menu.Menu("Лидеры:", 300, 400, theme=menu.themes.THEME_BLUE)
-        leader_screen.add.label(f'1 место - {utils.get_top_players()[0].score}')
-        leader_screen.add.label(f'2 место - {utils.get_top_players()[1].score}')
-        leader_screen.add.label(f'3 место - {utils.get_top_players()[2].score}')
+        leaders = utils.get_high_score()
+        leader_screen.add.label(f'1 место - {leaders[0]}')
+        leader_screen.add.label(f'2 место - {leaders[1]}')
+        leader_screen.add.label(f'3 место - {leaders[2]}')
         leader_screen.add.button('Меню', self.show_start_screen)
         leader_screen.mainloop(screen)
 
-game = Game()
+
 if __name__ == '__main__':
+    game = Game()
     game.show_start_screen()

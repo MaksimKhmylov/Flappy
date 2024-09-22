@@ -23,8 +23,18 @@ def create_db():
 def save_to_db(player_name, score):
     HighScore.create(player_name=player_name, score=score)
 
-def get_top_players(count=10):
+def get_top_players(count=3):
     return HighScore.select().order_by(HighScore.score.desc())[:count]
 
+
 def get_top_player():
-    return HighScore.select().order_by(HighScore.score.desc())[0]
+    try:
+        return get_top_players()[0]
+    except IndexError:
+        return 0
+
+
+def get_high_score(count=3):
+    scores = [player.score for player in get_top_players(count)]
+    scores.extend([0]*(count-len(scores)))
+    return scores
